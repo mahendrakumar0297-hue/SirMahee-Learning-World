@@ -17,24 +17,22 @@
 ```
 learning-world/
 ├── README.md               1. यह फ़ाइल: प्रोजेक्ट की जानकारी
-├── assets/
-│   └── bg.jpg              2. बैकग्राउंड इमेज
+├── index.html              2. मुख्य पेज, सब फ़ाइलों को जोड़ता है
 ├── css/
-│   └── style.css           3. डिज़ाइन और थीम
+│   └── style.css           3. डिज़ाइन और थीम (क्रीम + गोल्ड + नेवी)
 ├── js/
 │   ├── config.js           4. Supabase सेटिंग (URL और publishable key)
-│   ├── app.js              5. ऐप का मुख्य कोड: पेज, नेविगेशन, थीम
+│   ├── app.js              5. ऐप का मुख्य कोड: पेज, पॉपअप, क्विज़, प्लानर, सेटिंग्स
 │   └── auth.js             6. लॉगिन, प्रोफ़ाइल, Announcements, Notifications
-├── database/
-│   └── step1_database.sql  7. डेटाबेस, Supabase में सिर्फ़ एक बार चलाना है
-└── index.html              8. मुख्य पेज, ऊपर की सब फ़ाइलों को जोड़ता है
+└── database/
+    └── step1-database.sql  7. डेटाबेस, Supabase में सिर्फ़ एक बार चलाना है
 ```
 
 आगे के Steps में `js/` में नई फ़ाइलें जुड़ेंगी (जैसे `materials.js`, `quiz.js`, `ai.js`)।
 
 ## शुरू करने का तरीका
 
-1. **Supabase:** अपने प्रोजेक्ट में SQL Editor खोलकर `database/step1_database.sql` की पूरी सामग्री चलाएँ।
+1. **Supabase:** अपने प्रोजेक्ट में SQL Editor खोलकर `database/step1-database.sql` की पूरी सामग्री चलाएँ।
 2. **Supabase:** Authentication → Providers → Email में **Confirm email** फ़िलहाल बंद करें।
 3. **GitHub:** सारी फ़ाइलें इस रिपॉज़िटरी में डालें, फिर Settings → Pages → Branch `main` / `(root)` चुनकर Save करें।
 4. ऐप खोलकर अपना अकाउंट बनाएँ, फिर SQL Editor में चलाएँ:
@@ -50,6 +48,7 @@ learning-world/
 ## प्रगति
 
 - [x] **Step 1:** लॉगिन, प्रोफ़ाइल, Announcements, Notifications
+- [x] **इंटरफ़ेस:** क्रीम-गोल्ड थीम, पॉपअप एनिमेशन, क्विज़, प्लानर, AI चैट (प्रीव्यू), सेटिंग्स
 - [ ] **Step 2:** My Courses, Study Materials, Downloads, Bookmarks, Timetable, Study Planner, Assignments
 - [ ] **Step 3:** Quiz & Practice, Board Exam Practice, Progress, Leaderboard, Achievements
 - [ ] **Step 4:** Gemini AI: Doubt Solver, Photo Solver, Question Generator, Voice Tutor, English Speaking
