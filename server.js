@@ -27,8 +27,10 @@ const MSG = {
   },
 };
 fs.mkdirSync(CFG.dir, { recursive: true });
+// Fail fast with a clear startup error if the configured data directory is not writable.
+fs.accessSync(CFG.dir, fs.constants.R_OK | fs.constants.W_OK);
 const readJson = (f, d) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return d; } };
-const writeJson = (f, o, mode = 0o644) => { const t = f + '.tmp'; fs.writeFileSync(t, JSON.stringify(o), { mode }); fs.renameSync(t, f); };
+const writeJson = (f, o, mode = 0o600) => { const t = f + '.' + process.pid + '.tmp'; fs.writeFileSync(t, JSON.stringify(o), { mode }); fs.renameSync(t, f); };
 const log = (...a) => console.log(new Date().toISOString(), ...a);
 
 // ---- VAPID keys (generated once, kept in data/vapid.json — never delete or share) ----
@@ -82,17 +84,22 @@ async function pushAll(list) {
   for (let i = 0; i < list.length; i += 50) (await Promise.all(list.slice(i, i + 50).map(pushOne))).forEach(r => out[r]++);
   return out;
 }
+let tickRunning = false;
 async function tick(now = new Date()) {
+  if (tickRunning) return [];
+  tickRunning = true;
+  try {
   const t = localParts(now), sent = [];
   for (const s of SLOTS) {
     const at = s.h * 60 + s.m;
     if (state.last[s.id] !== t.date && t.min >= at && t.min < at + GRACE) {
       state.last[s.id] = t.date; saveState(); // mark first so a crash can never double-send
-      const r = await pushAll([...subs.values()].filter(x => x.prefs[s.id]));
+      const r = await pushAll([...subs.values()].filter(x => x.prefs && x.prefs[s.id]));
       log(`slot ${s.id}`, r); sent.push([s.id, r]);
     }
   }
   return sent;
+  } finally { tickRunning = false; }
 }
 
 // ---- http ----
@@ -110,7 +117,7 @@ function validEndpoint(e) {
   if (typeof e !== 'string' || e.length > 1000) return false;
   let u; try { u = new URL(e); } catch { return false; }
   if (CFG.insecure && u.protocol === 'http:' && ['127.0.0.1', 'localhost'].includes(u.hostname)) return true;
-  return u.protocol === 'https:' && PUSH_HOSTS.test(u.hostname);
+  return u.protocol === 'https:' && !u.username && !u.password && (!u.port || u.port === '443') && PUSH_HOSTS.test(u.hostname.toLowerCase());
 }
 const prefsOf = p => ({ morning: !p || p.morning !== false, evening: !p || p.evening !== false });
 const clean = (s, n) => String(s || '').replace(/[\u0000-\u001f]/g, ' ').slice(0, n).trim();
@@ -122,6 +129,7 @@ async function api(req, res, pathname) {
   if (req.method === 'GET' && pathname === '/api/vapid-public-key') return send(res, 200, { key: V.pub });
   if (req.method !== 'POST' && pathname !== '/api/stats') return send(res, 405, { error: 'method' });
   if (pathname === '/api/stats') {
+    if (req.method !== 'GET') return send(res, 405, { error: 'method' });
     const a = adminState(req); if (a === null) return send(res, 503, { error: 'admin disabled' }); if (!a) return send(res, 401, { error: 'unauthorized' });
     const all = [...subs.values()]; return send(res, 200, { total: all.length, morning: all.filter(s => s.prefs.morning).length, evening: all.filter(s => s.prefs.evening).length, last: state.last });
   }
