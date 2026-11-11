@@ -1,0 +1,1 @@
+{ "name": "sir-mahee-learning-world", "version": "7.1.0", "private": true, "description": "Sir Mahee Learning World app + reminder backend", "main": "server.js", "engines": { "node": ">=18" }, "scripts": { "start": "node server.js", "test": "node test.js" } }
